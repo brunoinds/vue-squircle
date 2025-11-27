@@ -1,16 +1,11 @@
 {
   "private": false,
   "name": "vue-squircle",
-  "version": "0.2.0",
-  "description": "Smooth rounded corners (like iOS) for Vue",
+  "version": "1.0.0",
+  "description": "Smooth rounded corners (like iOS) for Vue 3",
   "main": "./dist/index.js",
   "scripts": {
-    "dev": "vue serve VSquircle.vue",
-    "build": "bili --name index --plugin vue --vue.css false"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/janospower/vue-squircle.git"
+    "dev": "vue serve VSquircle.vue"
   },
   "keywords": [
     "vue",
@@ -27,15 +22,8 @@
     "curve",
     "superellipse"
   ],
-  "author": "Janos Pauer",
+  "author": "Bruno Freire",
   "license": "MIT",
-  "files": [
-    "dist/*"
-  ],
-  "bugs": {
-    "url": "https://github.com/janospower/vue-squircle/issues"
-  },
-  "homepage": "https://github.com/janospower/vue-squircle#readme",
   "devDependencies": {
     "bili": "^5.0.5",
     "rollup-plugin-vue": "^5.1.9",
