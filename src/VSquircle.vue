@@ -17,100 +17,104 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "v-squircle",
-  props: {
-    radius: {
-      type: String,
-      default: '25px'
-    },
-    smoothing: {
-      type: Number,
-      default: 4
-    },
-    padding: {
-      type: String,
-      default: '25px'
-    },
-    background: {
-      type: String,
-      default: 'hsla(0,0%,0%,0.5)'
-    }
-  },
-  data() {
-    return {
-      polygon: [],
-    }
-  },
-  methods: {
-    squircle(r) {
-      return function (theta) {
-        let x = Math.pow(Math.abs(Math.cos(theta)), 2 / r) * 50 * Math.sign(Math.cos(theta)) + 50;
-        let y = Math.pow(Math.abs(Math.sin(theta)), 2 / r) * 50 * Math.sign(Math.sin(theta)) + 50;
-        return {x,y};
-      }
-    },
-    to_radians(deg) {
-      return deg * Math.PI / 180;
-    }
-  },
-  mounted() {
-    this.polygon = (new Array(91))
-     .fill(0)
-     .map((x, i) => i)
-     .map(this.to_radians) // Defined as deg => deg * Math.PI / 180 elsewhere
-     .map(this.squircle(this.smoothing)) // We'll use a border-radius of 4
-     .map(({ x, y }) => ({ x: Math.round(x * 10)/10, y: Math.round(y * 10)/10 })) // Round to the ones place
-     .map(({ x, y }) => `${(x-50)*2}% ${(y-50)*2}%`);
-    this.polygon.push('0% 0%');
-    this.$emit("mounted")
-    console.log("mounted");
-  },
-  computed: {
-    style () {
-      return{
-        '--v-squircle-radius': this.radius,
-        '--v-squircle-smoothing': this.smoothing,
-        '--v-squircle-padding': this.padding,
-        '--v-squircle-polygon': 'polygon(' + this.polygon + ')',
-        '--v-squircle-background': this.background
-      }
-    }
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
+
+defineOptions({
+  name: 'v-squircle'
+});
+
+const props = withDefaults(defineProps<{
+  radius?: string;
+  smoothing?: number;
+  padding?: string;
+  background?: string;
+}>(), {
+  radius: '25px',
+  smoothing: 4,
+  padding: '25px',
+  background: 'hsla(0,0%,0%,0.5)'
+});
+
+const emit = defineEmits<{
+  (e: 'mounted'): void
+}>();
+
+const polygon = ref<string[]>([]);
+
+const squircle = (r: number) => {
+  return function (theta: number) {
+    let x = Math.pow(Math.abs(Math.cos(theta)), 2 / r) * 50 * Math.sign(Math.cos(theta)) + 50;
+    let y = Math.pow(Math.abs(Math.sin(theta)), 2 / r) * 50 * Math.sign(Math.sin(theta)) + 50;
+    return {x,y};
   }
 };
-//  from https://medium.com/@zubryjs/squircles-bringing-ios-7s-solution-to-rounded-rectangles-to-css-9fc35779aa65
+
+const to_radians = (deg: number) => {
+  return deg * Math.PI / 180;
+};
+
+onMounted(() => {
+  polygon.value = (new Array(91))
+    .fill(0)
+    .map((x, i) => i)
+    .map(to_radians)
+    .map(squircle(props.smoothing))
+    .map(({ x, y }) => ({ x: Math.round(x * 10)/10, y: Math.round(y * 10)/10 }))
+    .map(({ x, y }) => `${(x-50)*2}% ${(y-50)*2}%`);
+  polygon.value.push('0% 0%');
+  emit("mounted");
+  console.log("mounted");
+});
+
+const style = computed(() => {
+  return {
+    '--v-squircle-radius': props.radius,
+    '--v-squircle-smoothing': props.smoothing,
+    '--v-squircle-padding': props.padding,
+    '--v-squircle-polygon': 'polygon(' + polygon.value + ')',
+    '--v-squircle-background': props.background
+  } as any;
+});
 </script>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .v-squircle {
   display: grid;
-}
-.v-squircle--background {
-  display: grid;
-  grid-template: var(--v-squircle-radius) auto var(--v-squircle-radius) / var(--v-squircle-radius) auto var(--v-squircle-radius);
-}
-.v-squircle--segment {
-  width: var(--v-squircle-radius);
-  height: var(--v-squircle-radius);
-  clip-path: var(--v-squircle-polygon);
-}
-.v-squircle--filler, .v-squircle--segment {
-  background-color: var(--v-squircle-background);
-}
-.v-squircle--segment--bottom-left {
-  transform: rotate(90deg);
-}
-.v-squircle--segment--top-left {
-  transform: rotate(180deg);
-}
-.v-squircle--segment--top-right {
-  transform: rotate(270deg);
-}
-.v-squircle--slot, .v-squircle--background {
-  grid-area: 1 / 1 / 1 / 1;
-}
-.v-squircle--slot {
-  padding: var(--v-squircle-padding);
+
+  &--background {
+    display: grid;
+    grid-template: var(--v-squircle-radius) auto var(--v-squircle-radius) / var(--v-squircle-radius) auto var(--v-squircle-radius);
+  }
+
+  &--segment {
+    width: var(--v-squircle-radius);
+    height: var(--v-squircle-radius);
+    clip-path: var(--v-squircle-polygon);
+  }
+
+  &--filler, &--segment {
+    background-color: var(--v-squircle-background);
+  }
+
+  &--segment--bottom-left {
+    transform: rotate(90deg);
+  }
+
+  &--segment--top-left {
+    transform: rotate(180deg);
+  }
+
+  &--segment--top-right {
+    transform: rotate(270deg);
+  }
+
+  &--slot, &--background {
+    grid-area: 1 / 1 / 1 / 1;
+  }
+
+  &--slot {
+    padding: var(--v-squircle-padding);
+  }
 }
 </style>
